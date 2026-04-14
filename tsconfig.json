@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "esnext",
+    "outDir": "./lib",
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "forceConsistentCasingInFileNames": true,
+    "declaration": false,
+    "sourceMap": false,
+    "strictNullChecks": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@commands/*": ["src/commands/*"],
+      "@commands": ["src/commands/index.js"],
+      "@constants/*": ["src/constants/*"],
+      "@constants": ["src/constants/index.js"],
+      "@macros/*": ["src/macros/*"],
+      "@macros": ["src/macros/index.js"],
+      "@services/*": ["src/services/*"],
+      "@services": ["src/services/index.js"],
+      "@utils/*": ["src/utils/*"],
+      "@utils": ["src/utils/index.js"],
+      "@validation/*": ["src/validation/*"],
+      "@validation": ["src/validation/index.js"]
+    },
+    "types": ["node", "@runium/types-core"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["lib/**/*"]
+}
