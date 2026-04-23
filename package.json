@@ -1,6 +1,6 @@
 {
   "name": "@runium/cli",
-  "version": "2026.2.0",
+  "version": "2026.2.1",
   "description": "Runium CLI",
   "author": "TheBeastApp",
   "license": "MIT",
@@ -18,14 +18,14 @@
     "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
-    "@runium/core": "^1.0.1",
+    "@runium/core": "^1.0.2",
     "@segment/ajv-human-errors": "^2.15.0",
     "commander": "^14.0.2",
     "reflect-metadata": "^0.2.2",
     "typedi": "^0.10.0"
   },
   "devDependencies": {
-    "@runium/types-core": "^1.0.1",
+    "@runium/types-core": "^1.0.2",
     "@types/node": "^22.18.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
