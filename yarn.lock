@@ -258,19 +258,19 @@
   resolved "https://registry.yarnpkg.com/@pkgr/core/-/core-0.2.9.tgz#d229a7b7f9dac167a156992ef23c7f023653f53b"
   integrity sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==
 
-"@runium/core@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@runium/core/-/core-1.0.1.tgz#9b38803ff1591aebbbc72b25d19311d555a2db65"
-  integrity sha512-wbrkflckt9RuszEzNVqMFKCNGspBvNrjVK4P3SiwK4FSFmkTVsEJeBmIDiB4eUW4tMj7hPDZISykolct0gbvAw==
+"@runium/core@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@runium/core/-/core-1.0.2.tgz#06bf600d0e39b201632495fc50c217423743304e"
+  integrity sha512-CgOUT2rKmr+r2iFtgrgl5Fx4Dg8IQruLBbop1WsCTB2ZpbLm6GCM7HBen+OEawkJHTkozZWHR1TbJk4/sclwTQ==
   dependencies:
     ajv "^8.17.1"
     ajv-keywords "^5.1.0"
     bcx-expression-evaluator "^1.2.1"
 
-"@runium/types-core@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@runium/types-core/-/types-core-1.0.1.tgz#c1b7262e2f2463572bf968eba5d460e2ef87df12"
-  integrity sha512-HPUNEX/7QzyG0Lx2tV6udTaUISG080aLD16mcW3r2c9gHpZfW9xc6SYao6GHU3SXAg2pa7EBDDPjweDLDn9ieg==
+"@runium/types-core@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@runium/types-core/-/types-core-1.0.2.tgz#e9e4f16faa5f3fdbb2dc87bffa900f19a655f65c"
+  integrity sha512-qftpQBong9pquWyi3NJmYWWOT3kDeEeE5wTgoDn3DGIaJELpSpTAyp6sU35wGbvCjkA0hNX4ZX0RtrXhK7JZug==
   dependencies:
     "@types/node" "^22.18.0"
 

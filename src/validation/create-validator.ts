@@ -1,4 +1,6 @@
-import Ajv, { ValidateFunction } from 'ajv/dist/2020.js';
+import { ValidateFunction } from 'ajv/dist/2020.js';
+
+import { Ajv } from '@runium/core';
 
 const classes = { Function: Function };
 
