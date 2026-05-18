@@ -4,9 +4,11 @@ import { Command } from 'commander';
 import { Container } from 'typedi';
 import { RuniumError } from '@runium/core';
 import * as commands from '@commands';
+import { RuniumEvent } from '@constants';
 import {
   CommandService,
   ConfigService,
+  EmitterService,
   ProfileService,
   PluginService,
   ShutdownService,
@@ -28,6 +30,7 @@ export class RuniumCliApp {
 
   private commandService: CommandService;
   private configService: ConfigService;
+  private emitterService: EmitterService;
   private profileService: ProfileService;
   private pluginService: PluginService;
   private shutdownService: ShutdownService;
@@ -36,6 +39,7 @@ export class RuniumCliApp {
 
   constructor() {
     this.program = new Command('runium');
+    this.emitterService = Container.get(EmitterService);
     this.configService = Container.get(ConfigService);
     this.profileService = Container.get(ProfileService);
     this.pluginService = Container.get(PluginService);
@@ -54,11 +58,11 @@ export class RuniumCliApp {
     await this.configService
       .init({ profilePath: profile, debug })
       .catch(error => {
-        this.initOutput();
+        this.initOutput(debug);
         throw error;
       });
 
-    this.initOutput();
+    this.initOutput(debug);
 
     await this.shutdownService.init();
     await this.profileService.init();
@@ -70,6 +74,8 @@ export class RuniumCliApp {
     await this.initProgram();
     await this.initPlugins();
 
+    await this.emitterService.emit(RuniumEvent.APP_STARTED, undefined);
+
     return this.program.parseAsync();
   }
 
@@ -77,6 +83,7 @@ export class RuniumCliApp {
    * Load plugins
    */
   private async loadPlugins(): Promise<void> {
+    const loaded: string[] = [];
     const plugins = this.profileService.getPlugins();
     for (const plugin of plugins) {
       if (plugin.disabled !== true) {
@@ -86,8 +93,9 @@ export class RuniumCliApp {
             plugin.file
           );
           await this.pluginService.loadPlugin(pluginPath, plugin.options);
+          loaded.push(plugin.name);
         } catch (error) {
-          this.outputService.error(`Failed to load plugin "${plugin.name}"`);
+          this.outputService.warn(`Failed to load plugin "${plugin.name}"`);
           const { code, message, payload } = error as RuniumError;
           this.outputService.debug('Error details:', {
             message,
@@ -97,6 +105,7 @@ export class RuniumCliApp {
         }
       }
     }
+    await this.emitterService.emit(RuniumEvent.APP_PLUGINS_LOADED, loaded);
   }
 
   /**
@@ -126,10 +135,11 @@ export class RuniumCliApp {
 
   /**
    * Initialize the output
+   * @param debug
    */
-  private initOutput(): void {
+  private initOutput(debug: boolean = false): void {
     const output = this.configService.get('output');
-    if (output.debug) {
+    if (debug || output.debug) {
       this.setDebugMode();
     }
   }
@@ -165,7 +175,7 @@ export class RuniumCliApp {
         this.outputService.debug(`Loading env file "${envPath}"`);
         process.loadEnvFile(envPath);
       } else {
-        this.outputService.error(`Env file "${envPath}" not found`);
+        this.outputService.warn(`Env file "${envPath}" not found`);
       }
     }
   }

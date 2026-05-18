@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { Inject, Service } from 'typedi';
 import { applyMacros, Project, ProjectConfig, RuniumError } from '@runium/core';
 import { ErrorCode } from '@constants';
-import { macros } from '@macros';
+import { macros, globalMacros } from '@macros';
 import { PluginProjectDefinition, PluginService } from '@services';
 
 @Service()
@@ -93,7 +93,12 @@ export class ProjectService {
       (acc, plugin) => ({ ...acc, ...(plugin.project?.macros || {}) }),
       {}
     );
-    return applyMacros(text, { ...pluginMacros, ...macros });
+    let result = applyMacros(text, { ...pluginMacros, ...macros });
+    result = Object.values(globalMacros).reduce(
+      (acc, macro) => macro(acc),
+      result
+    );
+    return result;
   }
 
   /**

@@ -55,7 +55,7 @@ export class PluginSetOptionsCommand extends PluginCommand {
       }
 
       if (result) {
-        this.outputService.info(
+        this.outputService.success(
           'Plugin "%s" options successfully updated',
           profilePlugin.name
         );
@@ -67,7 +67,7 @@ export class PluginSetOptionsCommand extends PluginCommand {
         );
       }
     } else {
-      this.outputService.info(
+      this.outputService.warn(
         'Plugin "%s" does not support options',
         profilePlugin.name
       );

@@ -258,19 +258,19 @@
   resolved "https://registry.yarnpkg.com/@pkgr/core/-/core-0.2.9.tgz#d229a7b7f9dac167a156992ef23c7f023653f53b"
   integrity sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==
 
-"@runium/core@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@runium/core/-/core-1.0.2.tgz#06bf600d0e39b201632495fc50c217423743304e"
-  integrity sha512-CgOUT2rKmr+r2iFtgrgl5Fx4Dg8IQruLBbop1WsCTB2ZpbLm6GCM7HBen+OEawkJHTkozZWHR1TbJk4/sclwTQ==
+"@runium/core@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@runium/core/-/core-1.0.3.tgz#3fba683870b61cbb64462df0d67604a9f11bf84b"
+  integrity sha512-4CRFQLtG9jTzP9dn4pKQRN2MXuVbHuCmov7ejYtnAwPi7YsKynMWU85gC/jWwpYIdm3QCREw2v4rOxw6SrRqow==
   dependencies:
     ajv "^8.17.1"
     ajv-keywords "^5.1.0"
     bcx-expression-evaluator "^1.2.1"
 
-"@runium/types-core@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@runium/types-core/-/types-core-1.0.2.tgz#e9e4f16faa5f3fdbb2dc87bffa900f19a655f65c"
-  integrity sha512-qftpQBong9pquWyi3NJmYWWOT3kDeEeE5wTgoDn3DGIaJELpSpTAyp6sU35wGbvCjkA0hNX4ZX0RtrXhK7JZug==
+"@runium/types-core@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@runium/types-core/-/types-core-1.0.3.tgz#fdc10441cc9981e70785c646cc9411cf0515b4aa"
+  integrity sha512-efcdbSidViWph/1hprWq+QmUKP2asKT1wGcULMXjmnUQsx09JhheYx4FClSKF3KRuBnxa4pBd3n6UbqR9iQw5g==
   dependencies:
     "@types/node" "^22.18.0"
 
@@ -622,6 +622,11 @@ eastasianwidth@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/eastasianwidth/-/eastasianwidth-0.2.0.tgz#696ce2ec0aa0e6ea93a397ffcf24aa7840c827cb"
   integrity sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==
+
+emittery@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/emittery/-/emittery-2.0.0.tgz#d2a99bfe05cc9104e75f9f3300a1861636fe9cfe"
+  integrity sha512-FLtgn/CGBXiX3ZtPAm5q4LWWepHChOt55J9u01WFu3dyap2U7IwptlrqoE1COR/kxwdy/DOxIBALSxIW449I1g==
 
 emoji-regex@^8.0.0:
   version "8.0.0"

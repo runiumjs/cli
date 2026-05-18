@@ -8,8 +8,8 @@ import {
   RuniumError,
   TaskState,
 } from '@runium/core';
-import { ErrorCode } from '@constants';
-import { AtomicWriter, ShutdownService } from '@services';
+import { ErrorCode, RuniumEvent } from '@constants';
+import { AtomicWriter, EmitterService, ShutdownService } from '@services';
 import { ProjectData, ProjectStateCommand } from './project-state-command.js';
 
 /**
@@ -17,11 +17,13 @@ import { ProjectData, ProjectStateCommand } from './project-state-command.js';
  */
 export class ProjectStartCommand extends ProjectStateCommand {
   protected shutdownService: ShutdownService;
+  protected emitterService: EmitterService;
   protected fileWriter: AtomicWriter | null = null;
 
   constructor(parent: Command) {
     super(parent);
     this.shutdownService = Container.get(ShutdownService);
+    this.emitterService = Container.get(EmitterService);
   }
 
   /**
@@ -100,6 +102,8 @@ export class ProjectStartCommand extends ProjectStateCommand {
       name: file ? null : name,
     });
 
+    this.proxyProjectEvents(project);
+
     await project.start();
   }
 
@@ -169,6 +173,37 @@ export class ProjectStartCommand extends ProjectStateCommand {
       if (state.status === 'stopped' && state.reason === 'action') {
         this.shutdownService.shutdown('project-stop').then();
       }
+    });
+  }
+
+  /**
+   * Proxy project events to emitter
+   * @param project
+   */
+  private proxyProjectEvents(project: Project): void {
+    project.on(ProjectEvent.STATE_CHANGE, state => {
+      this.emitterService.emit(RuniumEvent.PROJECT_STATE_CHANGE, {
+        id: project.getConfig().id,
+        state,
+      });
+    });
+    project.on(ProjectEvent.TASK_STATE_CHANGE, (taskId, state) => {
+      this.emitterService.emit(RuniumEvent.PROJECT_TASK_STATE_CHANGE, {
+        id: taskId,
+        state,
+      });
+    });
+    project.on(ProjectEvent.TASK_STDOUT, (taskId, data) => {
+      this.emitterService.emit(RuniumEvent.PROJECT_TASK_STDOUT, {
+        id: taskId,
+        data,
+      });
+    });
+    project.on(ProjectEvent.TASK_STDERR, (taskId, data) => {
+      this.emitterService.emit(RuniumEvent.PROJECT_TASK_STDERR, {
+        id: taskId,
+        data,
+      });
     });
   }
 

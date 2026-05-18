@@ -1,5 +1,6 @@
 export * from './command.js';
 export * from './config.js';
+export * from './emitter.js';
 export * from './file.js';
 export * from './output.js';
 export * from './profile.js';

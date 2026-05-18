@@ -34,7 +34,7 @@ export class PluginGetOptionsCommand extends PluginCommand {
 
     if (plugin?.options) {
       if (options.raw) {
-        this.outputService.info(JSON.stringify(profilePlugin.options, null, 2));
+        this.outputService.log(JSON.stringify(profilePlugin.options, null, 2));
       } else {
         this.outputService.table(
           this.getFlattenedOptions(profilePlugin.options || {}),
@@ -42,7 +42,7 @@ export class PluginGetOptionsCommand extends PluginCommand {
         );
       }
     } else {
-      this.outputService.info(
+      this.outputService.warn(
         'Plugin "%s" does not support options',
         profilePlugin.name
       );

@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { Container, Service } from 'typedi';
 import { isRuniumError, RuniumError } from '@runium/core';
-import { ErrorCode } from '@constants';
-import { PluginService } from '@services';
+import { ErrorCode, RuniumEvent } from '@constants';
+import { EmitterService, PluginService } from '@services';
 import {
   RuniumCommand,
   RuniumCommandConstructor,
@@ -127,6 +127,12 @@ export class CommandService {
       await handle.call(command, ...args);
 
       await pluginService.runHook('app.afterCommandRun', {
+        command: commandPath,
+        args,
+      });
+
+      const emitter = Container.get(EmitterService);
+      await emitter.emit(RuniumEvent.APP_COMMAND_RUN, {
         command: commandPath,
         args,
       });

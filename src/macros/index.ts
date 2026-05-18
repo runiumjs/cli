@@ -9,6 +9,8 @@ import { maxMacro, minMacro, randomMacro } from './math.js';
 import { platformMacro, usernameMacro } from './os.js';
 import { homeDirMacro, pathMacro, tmpDirMacro } from './path.js';
 import { uuidMacro } from './unique.js';
+import { spreadMacro } from './spread.js';
+import { weakKeyGlobalMacro } from './weak.js';
 
 export const macros = {
   base64decode: base64decodeMacro,
@@ -30,4 +32,9 @@ export const macros = {
   timestamp: timestampMacro,
   uuid: uuidMacro,
   username: usernameMacro,
+  spread: spreadMacro,
+};
+
+export const globalMacros = {
+  weak: weakKeyGlobalMacro,
 };
