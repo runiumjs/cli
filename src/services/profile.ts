@@ -3,8 +3,8 @@ import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Inject, Service } from 'typedi';
 import { RuniumError } from '@runium/core';
-import { ErrorCode } from '@constants';
-import { ConfigService, FileService } from '@services';
+import { ErrorCode, RuniumEvent } from '@constants';
+import { ConfigService, EmitterService, FileService } from '@services';
 
 export interface ProfilePlugin {
   name: string;
@@ -32,7 +32,8 @@ export class ProfileService {
 
   constructor(
     @Inject() private configService: ConfigService,
-    @Inject() private fileService: FileService
+    @Inject() private fileService: FileService,
+    @Inject() private emitterService: EmitterService
   ) {}
 
   /**
@@ -74,6 +75,7 @@ export class ProfileService {
       .filter(p => p.name !== plugin.name)
       .concat(plugin);
     await this.writePlugins();
+    await this.emitterService.emit(RuniumEvent.PLUGIN_ADDED, plugin.name);
   }
 
   /**
@@ -83,6 +85,7 @@ export class ProfileService {
   async removePlugin(name: string): Promise<void> {
     this.plugins = this.plugins.filter(plugin => plugin.name !== name);
     await this.writePlugins();
+    await this.emitterService.emit(RuniumEvent.PLUGIN_REMOVED, name);
   }
 
   /**
@@ -101,6 +104,7 @@ export class ProfileService {
         ...data,
       };
       await this.writePlugins();
+      await this.emitterService.emit(RuniumEvent.PLUGIN_UPDATED, name);
     }
   }
 
@@ -128,6 +132,7 @@ export class ProfileService {
       .filter(p => p.name !== project.name)
       .concat(project);
     await this.writeProjects();
+    await this.emitterService.emit(RuniumEvent.PROJECT_ADDED, project.name);
   }
 
   /**
@@ -137,6 +142,7 @@ export class ProfileService {
   async removeProject(name: string): Promise<void> {
     this.projects = this.projects.filter(p => p.name !== name);
     await this.writeProjects();
+    await this.emitterService.emit(RuniumEvent.PROJECT_REMOVED, name);
   }
 
   /**

@@ -1,0 +1,15 @@
+export enum RuniumEvent {
+  APP_STARTED = 'runium:app:started',
+  APP_PLUGINS_LOADED = 'runium:app:plugins-loaded',
+  APP_COMMAND_RUN = 'runium:app:command-run',
+  APP_PLUGINS_HOOK_RUN = 'runium:app:plugins-hook-run',
+  PLUGIN_ADDED = 'runium:plugin:added',
+  PLUGIN_REMOVED = 'runium:plugin:removed',
+  PLUGIN_UPDATED = 'runium:plugin:updated',
+  PROJECT_ADDED = 'runium:project:added',
+  PROJECT_REMOVED = 'runium:project:removed',
+  PROJECT_STATE_CHANGE = 'runium:project:state-change',
+  PROJECT_TASK_STATE_CHANGE = 'runium:project:task-state-change',
+  PROJECT_TASK_STDOUT = 'runium:project:task-stdout',
+  PROJECT_TASK_STDERR = 'runium:project:task-stderr',
+}

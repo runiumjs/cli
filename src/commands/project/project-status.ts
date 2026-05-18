@@ -115,7 +115,7 @@ export class ProjectStatusCommand extends ProjectStateCommand {
         this.outputService.table(mappedState, ['time', 'status']);
       }
     } else {
-      this.outputService.info(`No project status for "${name}"`);
+      this.outputService.warn(`No project status for "${name}"`);
     }
   }
 }

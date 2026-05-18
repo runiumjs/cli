@@ -13,8 +13,8 @@ import {
   RuniumTriggerParams,
 } from '@runium/core';
 import { RuniumCommandConstructor } from '@commands/runium-command.js';
-import { ErrorCode } from '@constants';
-import { OutputService } from '@services';
+import { ErrorCode, RuniumEvent } from '@constants';
+import { EmitterService, OutputService } from '@services';
 import {
   createValidator,
   getErrorMessages,
@@ -102,7 +102,10 @@ export class PluginService {
   private validator: ReturnType<typeof createValidator> =
     createValidator(getPluginSchema());
 
-  constructor(@Inject() private outputService: OutputService) {}
+  constructor(
+    @Inject() private outputService: OutputService,
+    @Inject() private emitterService: EmitterService
+  ) {}
 
   /**
    * Get all plugins
@@ -236,6 +239,10 @@ export class PluginService {
       }
     }
 
+    await this.emitterService.emit(RuniumEvent.APP_PLUGINS_HOOK_RUN, {
+      name,
+      params,
+    });
     return (mutable ? params : undefined) as M extends true ? T : void;
   }
 

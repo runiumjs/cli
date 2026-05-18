@@ -15,6 +15,7 @@ import {
 import { RuniumCommand } from '@commands/runium-command.js';
 import {
   CommandService,
+  EmitterService,
   FileService,
   OutputLevel,
   OutputService,
@@ -23,7 +24,7 @@ import {
 } from '@services';
 import { getVersion, convertPathToValidFileName } from '@utils';
 import { createValidator } from '@validation';
-import { ErrorCode } from '@constants';
+import { ErrorCode, RuniumEvent } from '@constants';
 
 global.runium = null;
 
@@ -31,6 +32,7 @@ global.runium = null;
 export class PluginContextService {
   constructor(
     @Inject() private commandService: CommandService,
+    @Inject() private emitterService: EmitterService,
     @Inject() private outputService: OutputService,
     @Inject() private shutdownService: ShutdownService,
     @Inject() private fileService: FileService,
@@ -79,71 +81,119 @@ export class PluginContextService {
     const command = this.commandService;
     const output = this.outputService;
     const shutdown = this.shutdownService;
+    const emitter = this.emitterService;
 
-    const runium = {
-      class: {
-        RuniumCommand,
-        CommandArgument: Argument,
-        CommandOption: Option,
-        RuniumError,
-        RuniumTask,
-        RuniumTrigger,
-      },
-      enum: {
-        OutputLevel: Object.keys(OutputLevel)
-          .filter(key => isNaN(Number(key)))
-          .reduce(
-            (acc, key) => {
-              acc[key] = OutputLevel[key as keyof typeof OutputLevel];
-              return acc;
-            },
-            {} as Record<string, number>
-          ),
-        ProjectEvent,
-        ProjectStatus,
-        TaskEvent,
-        TaskStatus,
-      },
-      utils: {
-        applyMacros,
-        isRuniumError,
-        pathToId: convertPathToValidFileName,
-      },
-      output: {
-        getLevel: output.getLevel.bind(output),
-        setLevel: output.setLevel.bind(output),
-        trace: output.trace.bind(output),
-        debug: output.debug.bind(output),
-        info: output.info.bind(output),
-        warn: output.warn.bind(output),
-        error: output.error.bind(output),
-        table: output.table.bind(output),
-        log: output.log.bind(output),
-      },
-      shutdown: {
-        addBlocker: shutdown.addBlocker.bind(shutdown),
-        removeBlocker: shutdown.removeBlocker.bind(shutdown),
-      },
-      command: {
-        has: command.hasCommand.bind(command),
-        run: command.runCommand.bind(command),
-      },
-      storage: {
-        read: this.createStorageWrapper('read'),
-        write: this.createStorageWrapper('write'),
-        readJson: this.createStorageWrapper('readJson'),
-        writeJson: this.createStorageWrapper('writeJson'),
-        isExists: this.createStorageWrapper('isExists'),
-        ensureDirExists: this.createStorageWrapper('ensureDirExists'),
-        remove: this.createStorageWrapper('remove'),
-        createAtomicWriter: this.createStorageWrapper('createAtomicWriter'),
-        getPath: this.resolveProfilePath.bind(this),
-      },
-      validation: {
-        createValidator,
-      },
-      version: getVersion(),
+    const runium: Record<string, unknown> = {};
+
+    // define a lazy property on the runium object
+    const defineLazy = <T>(key: string, factory: () => T): void => {
+      let cached: T;
+      let initialized = false;
+      Object.defineProperty(runium, key, {
+        get(): T {
+          if (!initialized) {
+            cached = factory();
+            initialized = true;
+          }
+          return cached;
+        },
+        enumerable: true,
+        configurable: true,
+      });
     };
-    global.runium = Object.freeze(runium);
+
+    defineLazy('class', () => ({
+      RuniumCommand,
+      CommandArgument: Argument,
+      CommandOption: Option,
+      RuniumError,
+      RuniumTask,
+      RuniumTrigger,
+    }));
+
+    defineLazy('enum', () => ({
+      OutputLevel: Object.keys(OutputLevel)
+        .filter(key => isNaN(Number(key)))
+        .reduce(
+          (acc, key) => {
+            acc[key] = OutputLevel[key as keyof typeof OutputLevel];
+            return acc;
+          },
+          {} as Record<string, number>
+        ),
+      OutputStyle: output.getStyle(),
+      ProjectEvent,
+      ProjectStatus,
+      RuniumEvent,
+      TaskEvent,
+      TaskStatus,
+    }));
+
+    defineLazy('utils', () => ({
+      applyMacros,
+      isRuniumError,
+      pathToId: convertPathToValidFileName,
+    }));
+
+    defineLazy('output', () => ({
+      getLevel: output.getLevel.bind(output),
+      setLevel: output.setLevel.bind(output),
+      trace: output.trace.bind(output),
+      debug: output.debug.bind(output),
+      info: output.info.bind(output),
+      success: output.success.bind(output),
+      warn: output.warn.bind(output),
+      error: output.error.bind(output),
+      log: output.log.bind(output),
+      table: output.table.bind(output),
+      tree: output.tree.bind(output),
+      newLine: output.newLine.bind(output),
+      divider: output.divider.bind(output),
+      box: output.box.bind(output),
+      spinner: output.spinner.bind(output),
+      progress: output.progress.bind(output),
+      clear: output.clear.bind(output),
+      writeStdout: output.writeStdout.bind(output),
+      writeStderr: output.writeStderr.bind(output),
+    }));
+
+    defineLazy('shutdown', () => ({
+      addBlocker: shutdown.addBlocker.bind(shutdown),
+      removeBlocker: shutdown.removeBlocker.bind(shutdown),
+    }));
+
+    defineLazy('command', () => ({
+      has: command.hasCommand.bind(command),
+      run: command.runCommand.bind(command),
+    }));
+
+    defineLazy('storage', () => ({
+      read: this.createStorageWrapper('read'),
+      write: this.createStorageWrapper('write'),
+      readJson: this.createStorageWrapper('readJson'),
+      writeJson: this.createStorageWrapper('writeJson'),
+      isExists: this.createStorageWrapper('isExists'),
+      ensureDirExists: this.createStorageWrapper('ensureDirExists'),
+      remove: this.createStorageWrapper('remove'),
+      createAtomicWriter: this.createStorageWrapper('createAtomicWriter'),
+      getPath: this.resolveProfilePath.bind(this),
+    }));
+
+    defineLazy('validation', () => ({
+      createValidator,
+    }));
+
+    defineLazy('emitter', () => ({
+      emit: emitter.emit.bind(emitter),
+      on: emitter.on.bind(emitter),
+      once: emitter.once.bind(emitter),
+      onAny: emitter.onAny.bind(emitter),
+      off: emitter.off.bind(emitter),
+      offAny: emitter.offAny.bind(emitter),
+    }));
+
+    defineLazy('version', () => getVersion());
+
+    global.runium = Object.freeze(runium as object);
   }
 }

@@ -49,11 +49,10 @@ export class PluginListCommand extends PluginCommand {
     }
 
     if (plugins.length !== 0) {
-      this.outputService.table(plugins, [
-        'name',
-        'path',
-        ...(disabled || enabled ? [] : ['disabled']),
-      ]);
+      this.outputService.table(
+        plugins.map(p => ({ ...p, disabled: !!p.disabled })),
+        ['name', 'path', ...(disabled || enabled ? [] : ['disabled'])]
+      );
     } else {
       this.outputService.warn('No plugins found');
     }

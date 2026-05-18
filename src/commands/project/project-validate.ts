@@ -19,6 +19,7 @@ export class ProjectValidateCommand extends ProjectCommand {
       .name('validate')
       .description('validate project')
       .option('-f, --file', 'use file path instead of project name')
+      .option('-o, --output', 'output project content')
       .argument('<name>', 'project name');
   }
 
@@ -26,16 +27,23 @@ export class ProjectValidateCommand extends ProjectCommand {
    * Handle command
    * @param name
    * @param file
+   * @param output
    */
   protected async handle(
     name: string,
-    { file }: { file: boolean }
+    { file, output }: { file: boolean; output: boolean }
   ): Promise<void> {
     const path = file
       ? this.projectService.resolvePath(name)
       : this.ensureProfileProject(name).path;
     const projectInstance = await this.projectService.initProject(path);
     try {
+      if (output) {
+        this.outputService.log(
+          JSON.stringify(projectInstance.getConfig(), null, 2)
+        );
+        return;
+      }
       await projectInstance.validate();
       this.outputService.success(`Project "%s" is valid`, name);
     } catch (error) {
