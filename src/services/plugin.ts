@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Inject, Service } from 'typedi';
 import {
   isRuniumError,
@@ -137,7 +138,9 @@ export class PluginService {
     }
 
     try {
-      const pluginModule = (await import(path)) as PluginModule;
+      const pluginModule = (await import(
+        pathToFileURL(path).href
+      )) as PluginModule;
       const { default: getPlugin } = pluginModule;
       if (!getPlugin || typeof getPlugin !== 'function') {
         throw new RuniumError(
@@ -180,8 +183,7 @@ export class PluginService {
    */
   resolvePath(path: string, isFile: boolean = false): string {
     try {
-      const resolvedPath = isFile ? resolve(path) : import.meta.resolve(path);
-      return resolvedPath.replace('file://', '');
+      return isFile ? resolve(path) : fileURLToPath(import.meta.resolve(path));
     } catch (error) {
       throw new RuniumError(
         `Failed to resolve plugin path "${path}"`,
