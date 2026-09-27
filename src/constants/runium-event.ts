@@ -12,4 +12,5 @@ export enum RuniumEvent {
   PROJECT_TASK_STATE_CHANGE = 'runium:project:task-state-change',
   PROJECT_TASK_STDOUT = 'runium:project:task-stdout',
   PROJECT_TASK_STDERR = 'runium:project:task-stderr',
+  PROJECT_TASK_NOTICE = 'runium:project:task-notice',
 }

@@ -1,6 +1,6 @@
 {
   "name": "@runium/cli",
-  "version": "2026.3.1",
+  "version": "2026.4.0",
   "description": "Runium CLI",
   "author": "TheBeastApp",
   "license": "MIT",
@@ -18,19 +18,19 @@
     "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
-    "@runium/core": "^1.0.3",
-    "@segment/ajv-human-errors": "^2.15.0",
-    "commander": "^14.0.2",
-    "emittery": "^2.0.0",
-    "reflect-metadata": "^0.2.2",
-    "typedi": "^0.10.0"
+    "@runium/core": "1.1.0",
+    "@segment/ajv-human-errors": "2.16.0",
+    "commander": "14.0.3",
+    "emittery": "2.0.0",
+    "reflect-metadata": "0.2.2",
+    "typedi": "0.10.0"
   },
   "devDependencies": {
-    "@runium/types-core": "^1.0.3",
+    "@runium/types-core": "1.1.0",
     "@types/node": "^22.18.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
-    "ajv": "^8.17.1",
+    "ajv": "8.20.0",
     "esbuild": "^0.25.11",
     "esbuild-decorators": "^1.0.0",
     "eslint": "^8.56.0",
@@ -43,6 +43,6 @@
     "typescript": "^5.3.3"
   },
   "engines": {
-    "node": ">=20.12.0"
+    "node": ">=22"
   }
 }

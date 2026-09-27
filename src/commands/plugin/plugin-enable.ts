@@ -43,8 +43,13 @@ export class PluginEnableCommand extends PluginCommand {
         plugin.path,
         plugin.file
       );
-      await this.pluginService.loadPlugin(pluginPath, plugin.options);
-      this.outputService.success(`Plugin "%s" successfully enabled`, name);
+      const loadedName = await this.pluginService.loadPlugin(
+        pluginPath,
+        plugin.options
+      );
+      if (loadedName) {
+        this.outputService.success(`Plugin "%s" successfully enabled`, name);
+      }
     }
   }
 }

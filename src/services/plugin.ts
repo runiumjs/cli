@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { Option } from 'commander';
 import { Inject, Service } from 'typedi';
 import {
   isRuniumError,
@@ -22,7 +23,12 @@ import {
   getPluginSchema,
 } from '@validation';
 
-type PluginModule = { default: (options?: PluginOptions) => Plugin };
+const DEFAULT_PLUGIN_FACTORY_TIMEOUT = 10000;
+const PLUGIN_FACTORY_TIMEOUT_ENV = 'RUNIUM_PLUGIN_FACTORY_TIMEOUT';
+
+type PluginModule = {
+  default: (options?: PluginOptions) => Plugin | Promise<Plugin>;
+};
 
 type PluginHookErrorHandler = (error: RuniumError) => void;
 
@@ -52,6 +58,7 @@ export interface PluginOptionsDefinition {
 
 export interface PluginAppDefinition {
   commands?: RuniumCommandConstructor[];
+  commandOptionExtensions?: PluginCommandOptionExtension[];
 }
 
 export interface PluginProjectHooksDefinition {
@@ -81,6 +88,11 @@ export interface PluginHooksDefinition {
   project?: PluginProjectHooksDefinition;
 }
 
+export interface PluginCommandOptionExtension {
+  command: string;
+  options: Option[];
+}
+
 export interface Plugin {
   name: string;
   project?: PluginProjectDefinition;
@@ -97,8 +109,12 @@ export class PluginService {
   private plugins: Map<string, Plugin> = new Map();
 
   /**
+   * Cached factory timeout
+   */
+  private factoryTimeout: number | null = null;
+
+  /**
    * Validate plugin schema
-   * @private
    */
   private validator: ReturnType<typeof createValidator> =
     createValidator(getPluginSchema());
@@ -107,6 +123,33 @@ export class PluginService {
     @Inject() private outputService: OutputService,
     @Inject() private emitterService: EmitterService
   ) {}
+
+  /**
+   * Get plugin factory timeout from env
+   */
+  private getFactoryTimeout(): number {
+    if (this.factoryTimeout !== null) {
+      return this.factoryTimeout;
+    }
+
+    const raw = process.env[PLUGIN_FACTORY_TIMEOUT_ENV];
+    if (!raw) {
+      this.factoryTimeout = DEFAULT_PLUGIN_FACTORY_TIMEOUT;
+      return this.factoryTimeout;
+    }
+
+    const value = parseInt(raw, 10);
+    if (Number.isNaN(value) || value <= 0) {
+      this.outputService.warn(
+        `Invalid ${PLUGIN_FACTORY_TIMEOUT_ENV} value "${raw}", using default ${DEFAULT_PLUGIN_FACTORY_TIMEOUT}ms`
+      );
+      this.factoryTimeout = DEFAULT_PLUGIN_FACTORY_TIMEOUT;
+      return this.factoryTimeout;
+    }
+
+    this.factoryTimeout = value;
+    return this.factoryTimeout;
+  }
 
   /**
    * Get all plugins
@@ -128,7 +171,10 @@ export class PluginService {
    * @param path
    * @param options
    */
-  async loadPlugin(path: string, options?: PluginOptions): Promise<string> {
+  async loadPlugin(
+    path: string,
+    options?: PluginOptions
+  ): Promise<string | null> {
     if (!path || !existsSync(path)) {
       throw new RuniumError(
         `Plugin file "${path}" does not exist`,
@@ -149,7 +195,32 @@ export class PluginService {
           { path }
         );
       }
-      const plugin = getPlugin(options);
+
+      const timeout = this.getFactoryTimeout();
+      const timeoutError = new RuniumError(
+        `Plugin factory "${path}" timed out after ${timeout}ms`,
+        ErrorCode.PLUGIN_FACTORY_TIMEOUT,
+        { path, timeout }
+      );
+
+      let plugin: Plugin;
+      try {
+        plugin = await Promise.race([
+          Promise.resolve(getPlugin(options)),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(timeoutError), timeout).unref()
+          ),
+        ]);
+      } catch (error) {
+        if (
+          isRuniumError(error) &&
+          (error as RuniumError).code === ErrorCode.PLUGIN_FACTORY_TIMEOUT
+        ) {
+          this.outputService.warn((error as Error).message);
+          return null;
+        }
+        throw error;
+      }
 
       this.validate(plugin);
 

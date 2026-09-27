@@ -92,8 +92,13 @@ export class RuniumCliApp {
             plugin.path,
             plugin.file
           );
-          await this.pluginService.loadPlugin(pluginPath, plugin.options);
-          loaded.push(plugin.name);
+          const loadedName = await this.pluginService.loadPlugin(
+            pluginPath,
+            plugin.options
+          );
+          if (loadedName) {
+            loaded.push(plugin.name);
+          }
         } catch (error) {
           this.outputService.warn(`Failed to load plugin "${plugin.name}"`);
           const { code, message, payload } = error as RuniumError;
@@ -192,6 +197,18 @@ export class RuniumCliApp {
           this.commandService.registerCommand(
             command,
             this.program,
+            plugin.name
+          );
+        }
+      }
+    }
+    for (const plugin of plugins) {
+      const commandOptionExtensions = plugin.app?.commandOptionExtensions;
+      if (commandOptionExtensions) {
+        for (const extension of commandOptionExtensions) {
+          this.commandService.registerCommandOptions(
+            extension.command,
+            extension.options,
             plugin.name
           );
         }
