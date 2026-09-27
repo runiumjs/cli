@@ -11,6 +11,7 @@ export enum ErrorCode {
   PLUGIN_INVALID = 'plugin-invalid',
   PLUGIN_PATH_RESOLVE_ERROR = 'plugin-path-resolve-error',
   PLUGIN_LOAD_ERROR = 'plugin-load-error',
+  PLUGIN_FACTORY_TIMEOUT = 'plugin-factory-timeout',
   PLUGIN_HOOK_ERROR = 'plugin-hook-error',
   PLUGIN_PATH_NOT_SPECIFIED = 'plugin-path-not-specified',
   PROJECT_ALREADY_STARTED = 'project-already-started',

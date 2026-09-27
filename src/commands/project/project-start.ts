@@ -169,6 +169,12 @@ export class ProjectStartCommand extends ProjectStateCommand {
       }
     );
 
+    project.on(ProjectEvent.TASK_NOTICE, (taskId: string, data: string) => {
+      if (output) {
+        this.outputService.warn('Task "%s" %s', taskId, data);
+      }
+    });
+
     project.on(ProjectEvent.STATE_CHANGE, (state: ProjectState) => {
       if (state.status === 'stopped' && state.reason === 'action') {
         this.shutdownService.shutdown('project-stop').then();
@@ -201,6 +207,12 @@ export class ProjectStartCommand extends ProjectStateCommand {
     });
     project.on(ProjectEvent.TASK_STDERR, (taskId, data) => {
       this.emitterService.emit(RuniumEvent.PROJECT_TASK_STDERR, {
+        id: taskId,
+        data,
+      });
+    });
+    project.on(ProjectEvent.TASK_NOTICE, (taskId, data) => {
+      this.emitterService.emit(RuniumEvent.PROJECT_TASK_NOTICE, {
         id: taskId,
         data,
       });

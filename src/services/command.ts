@@ -1,4 +1,4 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { Container, Service } from 'typedi';
 import { isRuniumError, RuniumError } from '@runium/core';
 import { ErrorCode, RuniumEvent } from '@constants';
@@ -16,6 +16,10 @@ export class CommandService {
    * Full path commands
    */
   private fullPathCommands: Map<string, RuniumCommand> = new Map();
+
+  private commandOptionAttributes: Map<string, Set<string>> = new Map();
+
+  private commandOptionOwners: Map<string, Map<string, string>> = new Map();
 
   /**
    * Get command full path recursively
@@ -42,7 +46,7 @@ export class CommandService {
     // fallback: if parent not found in map, check if parent is the program
     const parentName = command.command.parent.name();
     if (parentName === PROGRAM_NAME) {
-      return commandName;
+      return commandName as string;
     }
 
     return [parentName, commandName].join(' ').trim();
@@ -100,6 +104,81 @@ export class CommandService {
     addCommand(command, program);
   }
 
+  registerCommandOptions(
+    path: string,
+    options: Option[],
+    context: string
+  ): void {
+    const command = this.fullPathCommands.get(path);
+    if (!command) {
+      throw new RuniumError(
+        `Failed to extend command "${path}" for "${context}": command not found`,
+        ErrorCode.COMMAND_NOT_FOUND,
+        { path, context }
+      );
+    }
+
+    const registeredOptions = [...command.command.options];
+    const owners =
+      this.commandOptionOwners.get(path) ?? new Map<string, string>();
+
+    for (const option of options) {
+      if (!(option instanceof Option)) {
+        throw new RuniumError(
+          `Failed to extend command "${path}" for "${context}": option must be an instance of "CommandOption"`,
+          ErrorCode.COMMAND_INCORRECT,
+          { path, context, option }
+        );
+      }
+
+      const conflictingOption = registeredOptions.find(registered => {
+        const registeredFlags = [registered.short, registered.long].filter(
+          Boolean
+        );
+        return [option.short, option.long]
+          .filter(Boolean)
+          .some(flag => registeredFlags.includes(flag));
+      });
+
+      if (conflictingOption) {
+        const conflictingFlag = [option.short, option.long].find(flag =>
+          [conflictingOption.short, conflictingOption.long].includes(flag)
+        );
+        throw new RuniumError(
+          `Failed to extend command "${path}" for "${context}": option flag "${conflictingFlag}" is already registered by "${owners.get(conflictingFlag!) ?? 'app'}"`,
+          ErrorCode.COMMAND_REGISTRATION_ERROR,
+          { path, context, flag: conflictingFlag }
+        );
+      }
+
+      const attribute = option.attributeName();
+      const conflictingAttribute = registeredOptions.find(
+        registered => registered.attributeName() === attribute
+      );
+      if (conflictingAttribute) {
+        throw new RuniumError(
+          `Failed to extend command "${path}" for "${context}": option attribute "${attribute}" is already registered`,
+          ErrorCode.COMMAND_REGISTRATION_ERROR,
+          { path, context, attribute }
+        );
+      }
+
+      registeredOptions.push(option);
+    }
+
+    const attributes =
+      this.commandOptionAttributes.get(path) ?? new Set<string>();
+    for (const option of options) {
+      command.command.addOption(option);
+      attributes.add(option.attributeName());
+      for (const flag of [option.short, option.long].filter(Boolean)) {
+        owners.set(flag!, context);
+      }
+    }
+    this.commandOptionAttributes.set(path, attributes);
+    this.commandOptionOwners.set(path, owners);
+  }
+
   /**
    * Create run command
    * @param handle
@@ -123,6 +202,19 @@ export class CommandService {
         command: commandPath,
         args,
       });
+
+      const optionAttributes = this.commandOptionAttributes.get(commandPath);
+      const parsedOptions = args[args.length - 1];
+      if (
+        optionAttributes &&
+        parsedOptions &&
+        typeof parsedOptions === 'object' &&
+        !Array.isArray(parsedOptions)
+      ) {
+        for (const attribute of optionAttributes) {
+          delete (parsedOptions as Record<string, unknown>)[attribute];
+        }
+      }
 
       await handle.call(command, ...args);
 

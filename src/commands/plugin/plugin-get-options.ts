@@ -30,7 +30,10 @@ export class PluginGetOptionsCommand extends PluginCommand {
       profilePlugin.path,
       profilePlugin.options
     );
-    const plugin = await this.pluginService.getPluginByName(pluginName);
+    if (!pluginName) {
+      return;
+    }
+    const plugin = this.pluginService.getPluginByName(pluginName);
 
     if (plugin?.options) {
       if (options.raw) {

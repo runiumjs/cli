@@ -31,7 +31,10 @@ export class PluginSetOptionsCommand extends PluginCommand {
       profilePlugin.path,
       profilePlugin.options
     );
-    const plugin = await this.pluginService.getPluginByName(pluginName);
+    if (!pluginName) {
+      return;
+    }
+    const plugin = this.pluginService.getPluginByName(pluginName);
 
     if (plugin?.options) {
       let parsed: Record<string, unknown> | null = {};

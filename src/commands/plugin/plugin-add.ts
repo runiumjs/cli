@@ -27,6 +27,9 @@ export class PluginAddCommand extends PluginCommand {
   ): Promise<void> {
     const pluginPath = this.pluginService.resolvePath(path, isFile);
     const name = await this.pluginService.loadPlugin(pluginPath, {});
+    if (!name) {
+      return;
+    }
     const plugin = this.pluginService.getPluginByName(name);
     if (plugin) {
       await this.profileService.addPlugin({

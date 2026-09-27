@@ -83,6 +83,28 @@ export function getPluginSchema(): object {
               instanceof: 'Function',
             },
           },
+          commandOptionExtensions: {
+            type: 'array',
+            description: 'Existing command option extensions',
+            items: {
+              type: 'object',
+              properties: {
+                command: {
+                  type: 'string',
+                  minLength: 1,
+                },
+                options: {
+                  type: 'array',
+                  minItems: 1,
+                  items: {
+                    type: 'object',
+                  },
+                },
+              },
+              required: ['command', 'options'],
+              additionalProperties: false,
+            },
+          },
         },
         additionalProperties: false,
       },
